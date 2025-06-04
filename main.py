@@ -29,7 +29,7 @@ ENV_INFO = {
 load_state()
 
 dashboard = Dashboard(SYMBOLS, stop_event)
-strategy.set_dashboard(dashboard)
+strategy.dashboard = dashboard
 
 def update_dashboard():
     for symbol in SYMBOLS:
