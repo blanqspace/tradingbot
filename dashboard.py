@@ -33,6 +33,10 @@ class Dashboard:
     def set_actions(self, actions):
         self.actions = actions[-5:]
 
+    def log_action(self, text):
+        self.actions.append(text)
+        self.actions = self.actions[-5:]
+
     def render_system_info(self):
         lines = [f"{key}: {value}" for key, value in self.system_info.items()]
         return Panel("\n".join(lines), title="🧐 Systeminformationen")

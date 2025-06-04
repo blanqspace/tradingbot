@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from config import SYMBOLS
 from recovery import load_state, save_state
 from state import get_symbol_state
-from strategy import run_strategy
+import strategy
 from utils.logging import log
 from dashboard import Dashboard
 from commands.terminal import handle_terminal
@@ -26,6 +26,7 @@ ENV_INFO = {
 load_state()
 
 dashboard = Dashboard(SYMBOLS, stop_event)
+strategy.set_dashboard(dashboard)
 
 def update_dashboard():
     for symbol in SYMBOLS:
@@ -45,7 +46,7 @@ def update_dashboard():
 
 def strategy_loop():
     while not stop_event.is_set():
-        run_strategy()
+        strategy.run_strategy()
         update_dashboard()
         time.sleep(5)
 
