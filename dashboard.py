@@ -84,6 +84,7 @@ class Dashboard:
         return layout
 
     def run(self, update_fn):
+        update_fn()
         with Live(self.render(), refresh_per_second=1, screen=True) as live:
             try:
                 while not self.stop_event.is_set():
