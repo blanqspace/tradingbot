@@ -1,0 +1,44 @@
+# >>> Python allgemeine Dateien
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# >>> Logs & Ausgaben
+*.log
+*.out
+*.err
+
+# >>> Umgebungsdateien
+.env
+*.env
+.env.*
+
+# >>> Jupyter-Notebooks
+.ipynb_checkpoints/
+
+# >>> VS Code & IDEs
+.vscode/
+.idea/
+*.swp
+
+# >>> Betriebssystem-Dateien
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# >>> Test-/Cache-Ordner
+.cache/
+.pytest_cache/
+.tox/
+
+# >>> Git-Ordner/Sicherungen
+*.orig
+
+# >>> Sonstiges
+*.bak
+*.tmp
