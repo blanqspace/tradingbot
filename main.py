@@ -1,4 +1,5 @@
 import os
+import platform
 import threading
 import time
 from dotenv import load_dotenv
@@ -17,9 +18,11 @@ stop_event = threading.Event()
 load_dotenv()
 
 ENV_INFO = {
-    ".env vorhanden": str(os.path.exists(".env")),
-    "Telegram aktiv": str(bool(os.getenv("TELEGRAM_TOKEN"))),
-    "Chat-ID geladen": str(bool(os.getenv("TELEGRAM_CHAT_ID")))
+    ".env vorhanden": os.path.exists(".env"),
+    "Telegram aktiv": bool(os.getenv("TELEGRAM_TOKEN")),
+    "Chat-ID geladen": bool(os.getenv("TELEGRAM_CHAT_ID")),
+    "Python": platform.python_version(),
+    "OS": f"{platform.system()} {platform.release()}"
 }
 
 # 2. Bot-Initialisierung

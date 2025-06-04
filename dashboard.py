@@ -38,8 +38,14 @@ class Dashboard:
         self.actions = self.actions[-5:]
 
     def render_system_info(self):
-        lines = [f"{key}: {value}" for key, value in self.system_info.items()]
-        return Panel("\n".join(lines), title="🧐 Systeminformationen")
+        table = Table.grid(expand=True)
+        table.add_column()
+        table.add_column(justify="right")
+        for key, value in self.system_info.items():
+            if isinstance(value, bool):
+                value = "✅" if value else "❌"
+            table.add_row(key, str(value))
+        return Panel(table, title="🧐 Systeminformationen", border_style="cyan")
 
     def render_table(self):
         table = Table(title="📊 TradingBot Status", expand=True)
