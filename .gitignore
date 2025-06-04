@@ -42,3 +42,6 @@ desktop.ini
 # >>> Sonstiges
 *.bak
 *.tmp
+# Ignore runtime directories
+logs/
+data/
