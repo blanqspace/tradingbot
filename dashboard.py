@@ -1,17 +1,17 @@
-# dashboard.py
-from rich.live import Live
-from rich.table import Table
+from rich.console import Console
 from rich.panel import Panel
-from rich.layout import Layout
+from rich.text import Text
+from rich.live import Live
 from time import sleep
 
 class Dashboard:
     def __init__(self, symbols, stop_event):
         self.symbols = symbols
         self.stop_event = stop_event
-        self.data = {s: {"paused": False, "order": "–", "signal": "–", "price": "–", "rsi": "–"} for s in symbols}
+        self.data = {s: {"paused": False, "order": False, "signal": "–", "price": "–", "rsi": "–"} for s in symbols}
         self.system_info = {}
         self.actions = []
+        self.console = Console()
 
     def update_symbol(self, symbol, paused=None, order=None, signal=None, price=None, rsi=None):
         if symbol not in self.data:
@@ -31,65 +31,33 @@ class Dashboard:
         self.system_info = info_dict
 
     def set_actions(self, actions):
-        self.actions = actions[-5:]
-
-    def log_action(self, text):
-        self.actions.append(text)
-        self.actions = self.actions[-5:]
-
-    def render_system_info(self):
-        table = Table.grid(expand=True)
-        table.add_column()
-        table.add_column(justify="right")
-        for key, value in self.system_info.items():
-            if isinstance(value, bool):
-                value = "✅" if value else "❌"
-            table.add_row(key, str(value))
-        return Panel(table, title="🧐 Systeminformationen", border_style="cyan")
-
-    def render_table(self):
-        table = Table(title="📊 TradingBot Status", expand=True)
-        table.add_column("Symbol")
-        table.add_column("Paused")
-        table.add_column("Order")
-        table.add_column("Signal")
-        table.add_column("Price")
-        table.add_column("RSI")
-        for s in self.symbols:
-            d = self.data[s]
-            table.add_row(
-                s,
-                "✅" if d["paused"] else "❌",
-                d["order"],
-                d["signal"],
-                str(d["price"]),
-                str(d["rsi"]),
-            )
-        return table
-
-    def render_actions(self):
-        actions_text = "\n".join(self.actions or ["Keine Aktionen bisher."])
-        return Panel(actions_text, title="📝 Letzte Aktionen")
+        self.actions = actions[-10:]
 
     def render(self):
-        layout = Layout()
-        layout.split_column(
-            Layout(name="top", size=5),
-            Layout(name="middle", ratio=2),
-            Layout(name="bottom", size=10)
-        )
-        layout["top"].update(self.render_system_info())
-        layout["middle"].update(self.render_table())
-        layout["bottom"].update(self.render_actions())
-        return layout
+        lines = []
+        lines.append("=== SYSTEM ===")
+        for k, v in self.system_info.items():
+            lines.append(f"{k}: {v}")
+
+        lines.append("\n=== SYMBOLSTATUS ===")
+        for s in self.symbols:
+            d = self.data[s]
+            status = f"{s}: {d['signal']} | Price: {d['price']} | RSI: {d['rsi']} | Order: {'🟢' if d['order'] else '–'} | Paused: {d['paused']}"
+            lines.append(status)
+
+        lines.append("\n=== LETZTE AKTIONEN ===")
+        if self.actions:
+            for a in self.actions:
+                lines.append(f"- {a}")
+        else:
+            lines.append("(Keine Aktionen)")
+
+        lines.append("\n⌨ Befehle: /pause SYMBOL, /resume SYMBOL, /buy SYMBOL, /status, r, exit")
+        return Panel(Text("\n".join(lines)))
 
     def run(self, update_fn):
-        update_fn()
         with Live(self.render(), refresh_per_second=1, screen=True) as live:
-            try:
-                while not self.stop_event.is_set():
-                    update_fn()
-                    live.update(self.render())
-                    sleep(1)
-            except KeyboardInterrupt:
-                self.stop_event.set()
+            while not self.stop_event.is_set():
+                update_fn()
+                live.update(self.render())
+                sleep(1)

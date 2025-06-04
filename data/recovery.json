@@ -1,13 +1,13 @@
 {
   "symbols": {
     "AAPL": {
-      "paused": false,
+      "paused": true,
       "last_signal": null,
       "order_status": null,
       "order_active": true
     },
     "TSLA": {
-      "paused": false,
+      "paused": true,
       "last_signal": null,
       "order_status": null,
       "order_active": true
@@ -21,21 +21,21 @@
   },
   "open_orders": {},
   "AAPL": {
-    "paused": false,
+    "paused": true,
     "order_active": true,
     "last_signal": "SELL",
     "last_price": null,
     "last_rsi": null
   },
   "TSLA": {
-    "paused": false,
+    "paused": true,
     "order_active": true,
     "last_signal": "HOLD",
     "last_price": null,
     "last_rsi": null
   },
   "MSFT": {
-    "paused": false,
+    "paused": true,
     "order_active": true,
     "last_signal": "BUY",
     "last_price": null,

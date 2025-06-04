@@ -1,6 +1,9 @@
+from prompt_toolkit import PromptSession
+from prompt_toolkit.patch_stdout import patch_stdout
 from state import get_symbol_state, set_symbol_state
 from order import submit_order
 
+# Liste erlaubter Befehle
 COMMANDS = ["/buy", "/pause", "/resume", "/status", "/clear", "/help", "exit"]
 
 def help_text():
@@ -34,7 +37,6 @@ def process_command(cmd_input: str) -> str:
         return "⚠️ Bitte genau ein Symbol angeben. Beispiel: /pause AAPL"
 
     symbol = args[0].upper()
-
     state = get_symbol_state(symbol)
 
     if cmd == "/status":
@@ -61,17 +63,19 @@ def process_command(cmd_input: str) -> str:
 
     return ""
 
-def handle_terminal():
-    while True:
-        try:
-            cmd_input = input("[COMMAND MENU] > ").strip()
-            if not cmd_input:
-                continue
-            response = process_command(cmd_input)
-            if response:
-                print(response)
-            if cmd_input.strip().lower() == "exit":
-                break
-        except (KeyboardInterrupt, EOFError):
-            break
+def handle_terminal(stop_event):
+    session = PromptSession()
 
+    while not stop_event.is_set():
+        try:
+            with patch_stdout():
+                cmd_input = session.prompt("[🟢 Terminal] > ").strip()
+                if not cmd_input:
+                    continue
+                response = process_command(cmd_input)
+                if response:
+                    print(response)
+                if cmd_input.lower() == "exit":
+                    stop_event.set()
+        except (KeyboardInterrupt, EOFError):
+            stop_event.set()
