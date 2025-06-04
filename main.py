@@ -1,11 +1,12 @@
 import os
+import platform
 import threading
 import time
 from dotenv import load_dotenv
 from config import SYMBOLS
 from recovery import load_state, save_state
 from state import get_symbol_state
-from strategy import run_strategy
+import strategy
 from utils.logging import log
 from dashboard import Dashboard
 from commands.terminal import handle_terminal
@@ -17,15 +18,18 @@ stop_event = threading.Event()
 load_dotenv()
 
 ENV_INFO = {
-    ".env vorhanden": str(os.path.exists(".env")),
-    "Telegram aktiv": str(bool(os.getenv("TELEGRAM_TOKEN"))),
-    "Chat-ID geladen": str(bool(os.getenv("TELEGRAM_CHAT_ID")))
+    ".env vorhanden": os.path.exists(".env"),
+    "Telegram aktiv": bool(os.getenv("TELEGRAM_TOKEN")),
+    "Chat-ID geladen": bool(os.getenv("TELEGRAM_CHAT_ID")),
+    "Python": platform.python_version(),
+    "OS": f"{platform.system()} {platform.release()}"
 }
 
 # 2. Bot-Initialisierung
 load_state()
 
 dashboard = Dashboard(SYMBOLS, stop_event)
+strategy.set_dashboard(dashboard)
 
 def update_dashboard():
     for symbol in SYMBOLS:
@@ -45,7 +49,7 @@ def update_dashboard():
 
 def strategy_loop():
     while not stop_event.is_set():
-        run_strategy()
+        strategy.run_strategy()
         update_dashboard()
         time.sleep(5)
 
@@ -57,6 +61,7 @@ def run():
     t2.start()
 
     try:
+        update_dashboard()
         dashboard.run(update_dashboard)
     except KeyboardInterrupt:
         stop_event.set()
