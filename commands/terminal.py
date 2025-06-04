@@ -61,8 +61,8 @@ def process_command(cmd_input: str) -> str:
 
     return ""
 
-def handle_terminal():
-    while True:
+def handle_terminal(stop_event):
+    while not stop_event.is_set():
         try:
             cmd_input = input("[COMMAND MENU] > ").strip()
             if not cmd_input:
@@ -71,7 +71,9 @@ def handle_terminal():
             if response:
                 print(response)
             if cmd_input.strip().lower() == "exit":
+                stop_event.set()
                 break
         except (KeyboardInterrupt, EOFError):
+            stop_event.set()
             break
 
