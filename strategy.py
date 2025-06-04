@@ -7,7 +7,11 @@ from order import submit_order
 from commands.telegram import send_signal_notification
 from dashboard import Dashboard
 
-dashboard: Dashboard = None  # wird im main.py gesetzt
+dashboard: Dashboard | None = None  # wird im main.py gesetzt
+
+def set_dashboard(instance: Dashboard):
+    global dashboard
+    dashboard = instance
 
 # Zufälliger Signalgenerator
 def check_signal(_symbol):
