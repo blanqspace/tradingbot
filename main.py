@@ -1,17 +1,19 @@
-import threading
+from threading import Thread, Event
 import time
-from config import SYMBOLS  # Removed ENV_INFO as it is not present in config
 
-# If ENV_INFO is defined elsewhere, import it from the correct module or define it here.
-# For example, if ENV_INFO should be a dictionary with environment info, you can define:
+from config import SYMBOLS
 ENV_INFO = {}
-from strategy import run_strategy, set_dashboard
 from dashboard import Dashboard
 from commands.terminal import handle_terminal
-from state import get_symbol_state, load_state, save_state
+from strategy import run_strategy
+from state import get_symbol_state
 from utils.logging import log
 
-stop_event = threading.Event()
+# Globales Stop-Event
+stop_event = Event()
+
+# Dashboard initialisieren
+dashboard = Dashboard(SYMBOLS, stop_event)
 
 def update_dashboard():
     dashboard.set_system_info(ENV_INFO)
@@ -20,11 +22,11 @@ def update_dashboard():
         state = get_symbol_state(symbol)
         dashboard.update_symbol(
             symbol,
-            paused=state.get("paused"),
-            order=state.get("order_active"),
-            signal=state.get("signal", "–"),
-            price=state.get("price", "–"),
-            rsi=state.get("rsi", "–")
+            paused=state.get("paused", False),
+            order="🟢" if state.get("order_active") else "–",
+            signal="–",
+            price="–",
+            rsi="–"
         )
 
 def strategy_loop():
@@ -34,28 +36,15 @@ def strategy_loop():
         time.sleep(5)
 
 def dashboard_loop():
-    dashboard.run(update_dashboard)
+    while not stop_event.is_set():
+        dashboard.run(update_dashboard)
+        time.sleep(15)
 
-if __name__ == "__main__":
-    print(".env vorhanden:", ENV_INFO.get(".env vorhanden"))
-    print("Telegram aktiv:", ENV_INFO.get("Telegram aktiv"), "Token geladen:", ENV_INFO.get("Token geladen"), "Chat-ID geladen:", ENV_INFO.get("Chat-ID geladen"))
+# Starte alle Threads
+Thread(target=handle_terminal, args=(stop_event,), daemon=True).start()
+Thread(target=dashboard_loop, daemon=True).start()
+Thread(target=strategy_loop, daemon=True).start()
 
-    load_state()
-
-    dashboard = Dashboard(SYMBOLS, stop_event)
-    set_dashboard(dashboard)
-
-    t1 = threading.Thread(target=strategy_loop)
-    t2 = threading.Thread(target=dashboard_loop)
-    t3 = threading.Thread(target=handle_terminal, args=(stop_event,))
-
-    t1.start()
-    t2.start()
-    t3.start()
-
-    t1.join()
-    t2.join()
-    t3.join()
-
-    save_state()
-    print("\nBot wurde beendet.")
+# Hauptthread wartet auf Stop
+stop_event.wait()
+print("✅ Bot wurde beendet.")
