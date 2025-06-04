@@ -61,6 +61,7 @@ def run():
     t2.start()
 
     try:
+        update_dashboard()
         dashboard.run(update_dashboard)
     except KeyboardInterrupt:
         stop_event.set()
